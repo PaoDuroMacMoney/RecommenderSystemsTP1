@@ -13,7 +13,7 @@ double standardDeviation(vector<double> list)
 double covariance(vector<double> first, vector<double> second)
 {
 	double meanFirst = mean(first), meanSecond = mean(second), sum = 0;
-	for (int i = 0; i < first.size(); i++)
+	for (unsigned int i = 0; i < first.size(); i++)
 	{
 		sum += (first[i] - meanFirst) * (second[i] - meanSecond);
 	}
@@ -23,7 +23,7 @@ double covariance(vector<double> first, vector<double> second)
 double mean(vector<double> list)
 {
 	double sum = 0;
-	for (int i = 0; i < list.size(); i++)
+	for (unsigned int i = 0; i < list.size(); i++)
 	{
 		sum += list[i];
 	}
