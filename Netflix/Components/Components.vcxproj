@@ -118,6 +118,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Estimative.h" />
+    <ClInclude Include="MathFuncs.h" />
+    <ClInclude Include="Normalization.h" />
+    <ClInclude Include="Similarity.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Estimative.cpp" />
+    <ClCompile Include="MathFuncs.cpp" />
+    <ClCompile Include="Normalization.cpp" />
+    <ClCompile Include="Similarity.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
