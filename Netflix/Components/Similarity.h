@@ -1,8 +1,5 @@
 #pragma once
-class Similarity
-{
-public:
-	Similarity();
-	~Similarity();
-};
 
+static double Pearson(vector<double> first, vector<double> second);
+
+static double Cosine(vector<double> first, vector<double> second);

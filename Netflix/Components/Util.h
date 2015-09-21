@@ -1,27 +1,16 @@
 #pragma once
 struct data_node
 {
-	int field;
-	int index;
-	float value;
+	int user;
+	int item;
+	int timestamp;
 };
 
 struct data_input
 {
 	int length;
-	int n;
-	int m;
-	data_node * X;
-	float * Y;
-	long long *P;
+	data_node * data;
+	float * value;
 };
 
-struct data_model
-{
-	/*int n;
-	int m;
-	int k;
-	float *W;
-	bool normalization;*/
-};
-
+data_input * read_input(char const * path);

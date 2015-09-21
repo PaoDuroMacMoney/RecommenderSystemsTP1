@@ -5,6 +5,11 @@
 
 using namespace std;
 
+double rmse(float first, float second)
+{
+	float error = first - second;
+	return sqrt(error*error);
+}
 double standardDeviation(vector<double> list)
 {
 	return sqrt(covariance(list, list));

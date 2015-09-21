@@ -1,5 +1,6 @@
 #include "CrossValidation.h"
 #include "Util.h"
+#include "MathFuncs.h"
 
 #include <algorithm>
 #include <vector>
@@ -7,44 +8,47 @@
 
 using namespace std;
 
-double cross_validation(int folds, data_input * prob)
+double crossValidation(int folds, data_input * input, float(*predictFunc) (data_input *, vector<int>, int, int))
 {
-	vector<int> order(prob->length);
-	for (int i = 0; i < prob->length; i++)
-		order[i] = i;
-	random_shuffle(order.begin(), order.end());
+	int inputLength = input->length;
 
-	double loss = 0;
-	int nr_instance_per_fold = prob->length / folds;
+	//create shuffled positions array
+	vector<int> shuffled(inputLength);
+	for (int i = 0; i < inputLength; i++)
+		shuffled[i] = i;
+	random_shuffle(shuffled.begin(), shuffled.end());
+
+	//iterate folders
+	double totalError = 0;
+	int foldInstances = inputLength / folds;
 	for (int fold = 0; fold < folds; fold++)
 	{
-		int begin = fold*nr_instance_per_fold;
-		int end = min(begin + nr_instance_per_fold, prob->length);
+		int begin = fold*foldInstances;
+		int end = min(begin + foldInstances, inputLength);
 
-		vector<int> order1;
-		for (int i = 0; i < begin; i++)
-			order1.push_back(order[i]);
-		for (int i = end; i < prob->length; i++)
-			order1.push_back(order[i]);
+		//separate data outside folder for training, and on folder for validation
+		vector<int> allButFolder;
+		vector<int> folder;
+		for (int i = 0; i < inputLength; i++)
+			if(i >= begin && i < end)
+				folder.push_back(shuffled[i]);
+			else
+				allButFolder.push_back(shuffled[i]);
 
-		data_model * model = train(prob, order1);
-
-		double loss1 = 0;
+		double iterationError = 0;
 		for (int ii = begin; ii < end; ii++)
 		{
-			int i = order[ii];
+			int index = shuffled[ii];
+			float realValue = input->value[index];
+			
+			int user = input->data[index].user;
+			int item = input->data[index].item;
 
-			double y = prob->Y[i];
+			float predictedValue = (*predictFunc)(input, allButFolder, user, item);
 
-			data_node *begin = &prob->X[prob->P[i]];
-
-			data_node *end = &prob->X[prob->P[i + 1]];
-
-			double y_bar = predict(begin, end, model);
-
-			loss1 -= y == 1 ? log(y_bar) : log(1 - y_bar);
+			iterationError += rmse(realValue, predictedValue);
 		}
-		loss += loss1;
+		totalError += iterationError;
 	}
-	return loss / prob-> length;
+	return totalError / inputLength;
 }
