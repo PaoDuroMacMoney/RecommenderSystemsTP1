@@ -1,5 +1,8 @@
 #pragma once
+#include <vector>
 
-static double Pearson(vector<double> first, vector<double> second);
+using namespace std;
 
-static double Cosine(vector<double> first, vector<double> second);
+double Pearson(vector<double> first, vector<double> second);
+
+double Cosine(vector<double> first, vector<double> second);

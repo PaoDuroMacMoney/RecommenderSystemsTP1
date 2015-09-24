@@ -3,12 +3,11 @@
 #include "MathFuncs.h"
 
 #include <algorithm>
-#include <vector>
 #include <cmath>
 
 using namespace std;
 
-double crossValidation(int folds, data_input * input, float(*predictFunc) (data_input *, vector<int>, int, int))
+double crossValidation(int folds, data_input * input, float(*predictFunc) (data_input *, string, string, vector<int>))
 {
 	int inputLength = input->length;
 
@@ -28,23 +27,19 @@ double crossValidation(int folds, data_input * input, float(*predictFunc) (data_
 
 		//separate data outside folder for training, and on folder for validation
 		vector<int> allButFolder;
-		vector<int> folder;
 		for (int i = 0; i < inputLength; i++)
-			if(i >= begin && i < end)
-				folder.push_back(shuffled[i]);
-			else
+			if(!(i >= begin && i < end))
 				allButFolder.push_back(shuffled[i]);
 
 		double iterationError = 0;
 		for (int ii = begin; ii < end; ii++)
 		{
 			int index = shuffled[ii];
-			float realValue = input->value[index];
-			
-			int user = input->data[index].user;
-			int item = input->data[index].item;
+			float realValue = input->data[index].value;			
+			string userId = input->data[index].userId;
+			string itemId = input->data[index].itemId;
 
-			float predictedValue = (*predictFunc)(input, allButFolder, user, item);
+			float predictedValue = (*predictFunc)(input, userId, itemId, allButFolder);
 
 			iterationError += rmse(realValue, predictedValue);
 		}

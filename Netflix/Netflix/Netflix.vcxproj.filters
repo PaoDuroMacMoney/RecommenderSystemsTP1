@@ -33,4 +33,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ratings.csv" />
+    <None Include="targets.csv" />
+    <None Include="submission-rand.csv" />
+  </ItemGroup>
 </Project>

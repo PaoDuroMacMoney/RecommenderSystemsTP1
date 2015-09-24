@@ -25,7 +25,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -121,16 +121,20 @@
     <ClInclude Include="CrossValidation.h" />
     <ClInclude Include="Estimative.h" />
     <ClInclude Include="MathFuncs.h" />
+    <ClInclude Include="Matrix.h" />
     <ClInclude Include="Normalization.h" />
     <ClInclude Include="Similarity.h" />
+    <ClInclude Include="Solver.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CrossValidation.cpp" />
     <ClCompile Include="Estimative.cpp" />
     <ClCompile Include="MathFuncs.cpp" />
+    <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Normalization.cpp" />
     <ClCompile Include="Similarity.cpp" />
+    <ClCompile Include="Solver.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

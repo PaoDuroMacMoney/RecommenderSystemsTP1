@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "..\Components\Util.h"
 
 #include <iostream>
 using namespace std;
@@ -9,6 +10,10 @@ using namespace std;
 
 int main()
 {
-    return 0;
+	data_input * input = read_input("ratings.csv");
+	data_input * target = read_input("targets.csv", true);
+
+
+	return 0;
 }
 
