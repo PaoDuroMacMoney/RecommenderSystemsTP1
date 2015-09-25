@@ -1,7 +1,13 @@
 #include "Solver.h"
 #include <fstream>
+#include <iostream>
 
-void GenericSolver::solve(data_input * input, data_input * target, vector<int> selectedIndexes)
+GenericSolver::GenericSolver(data_input * inputPtr)
+{
+	input = inputPtr;
+}
+
+void GenericSolver::solve( data_input * target, vector<int> selectedIndexes)
 {
 	std::ofstream fout("submission.csv");
 	fout << "UserId:ItemId,Prediction"<< std::endl;
@@ -9,22 +15,22 @@ void GenericSolver::solve(data_input * input, data_input * target, vector<int> s
 	for (int i = 0; i < target->length; i++)
 	{
 		data_node node = target->data[i];
-		node.value = predict(input, node.userId, node.itemId);
+		node.value = predict(node.userId, node.itemId);
 		fout << node.userId <<":"<< node.itemId<< ","<< node.value << std::endl;
 	}
 	fout.close();
 }
 
-ConstantOutputSolver::ConstantOutputSolver(){}
+ConstantOutputSolver::ConstantOutputSolver(data_input * input) : GenericSolver(input){}
 
-float ConstantOutputSolver::predict(data_input * input, string targetUser, string targetItem)
+float ConstantOutputSolver::predict(string targetUser, string targetItem)
 {
 	return 5.5f;
 }
 
-UserAveragesSolver::UserAveragesSolver(){}
+UserAveragesSolver::UserAveragesSolver(data_input * input) : GenericSolver(input) {}
 
-float UserAveragesSolver::predict(data_input * input, string targetUser, string targetItem)
+float UserAveragesSolver::predict( string targetUser, string targetItem)
 {
 	auto userIterator = input->userInfo.find(targetUser);
 	if (userIterator == input->userInfo.end())

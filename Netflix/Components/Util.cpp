@@ -150,3 +150,59 @@ float data_info::getAverage()
 	}
 	return average;
 }
+
+void data_info::normalize()
+{
+	average = getAverage();
+	std_deviation = getStdDeviation();
+
+	int valueIndex;
+	for (int i = 0; i < count; i++)
+	{
+		valueIndex = indexes[i];
+		((data_input *)parent)->data[valueIndex].value -= average;
+		if (std_deviation != 0)
+		{
+			((data_input *)parent)->data[valueIndex].value /= std_deviation;
+		}
+	}
+}
+
+float data_info::denormalize(float score)
+{
+	if (std_deviation == 0)
+		return average;
+	return score * std_deviation + average;
+}
+
+float data_info::getStdDeviation()
+{
+	if (count == 1)
+		return 0;
+	if (std_deviation == -1)
+	{
+		float sum = 0, mean = getAverage(), deviation;
+		int valueIndex;
+		for (int i = 0; i < count; i++)
+		{
+			valueIndex = indexes[i];
+			deviation = ((data_input *)parent)->data[valueIndex].value - mean;
+			sum += deviation * deviation;
+		}
+		std_deviation = sqrt(sum);
+	}
+	return std_deviation / (count - 1);
+}
+
+void data_input::normalizeUsers()
+{	
+	for (auto iterator = userInfo.begin(); iterator != userInfo.end(); iterator++)
+	{
+		iterator->second->normalize();
+	}
+}
+
+vector<neighboor> data_input::getNeighboorsForItem(string userId, string itemId)
+{
+	return vector<neighboor>();
+}

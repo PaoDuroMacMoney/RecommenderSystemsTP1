@@ -118,6 +118,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ColaborativeUserBasedSolver.h" />
     <ClInclude Include="CrossValidation.h" />
     <ClInclude Include="Estimative.h" />
     <ClInclude Include="MathFuncs.h" />
@@ -127,6 +128,7 @@
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ColaborativeUserBasedSolver.cpp" />
     <ClCompile Include="CrossValidation.cpp" />
     <ClCompile Include="Estimative.cpp" />
     <ClCompile Include="MathFuncs.cpp" />
