@@ -121,7 +121,6 @@
     <ClInclude Include="CrossValidation.h" />
     <ClInclude Include="Estimative.h" />
     <ClInclude Include="MathFuncs.h" />
-    <ClInclude Include="Matrix.h" />
     <ClInclude Include="Normalization.h" />
     <ClInclude Include="Similarity.h" />
     <ClInclude Include="Solver.h" />
@@ -131,7 +130,6 @@
     <ClCompile Include="CrossValidation.cpp" />
     <ClCompile Include="Estimative.cpp" />
     <ClCompile Include="MathFuncs.cpp" />
-    <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Normalization.cpp" />
     <ClCompile Include="Similarity.cpp" />
     <ClCompile Include="Solver.cpp" />

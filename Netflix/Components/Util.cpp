@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <unordered_map>
 #include <sstream> 
 
 data_input * read_input(char const *path, bool isTarget)
@@ -33,18 +34,10 @@ data_input * read_input(char const *path, bool isTarget)
 	std::cout << "Loading data to memory" << endl;
 
 	while (infile >> *input){}
+	input->generalAverage = input->generalAverage / input->length;
 
 	std::cout << "Loaded..." << endl;
 	return input;
-}
-
-void loadMap(unordered_map<string, int> * map, int * count, string key)
-{
-	if ( map -> find(key) == map -> end())
-	{
-		map -> insert(pair<string, int>(key, *count));
-		(*count)++;
-	}
 }
 
 std::istream & operator>>(std::istream & stream, data_input & input)
@@ -81,9 +74,10 @@ void readAsInput(std::istream & stream, data_input & input)
 			node->value = stof(value);
 			node->timestamp = stoi(timestamp);
 
-			loadMap(&input.userIndex, &input.users, node->userId);
-			loadMap(&input.itemIndex, &input.items, node->itemId);
+			loadMap(&input.userInfo, node->userId, input.insertIndex, &input);
+			loadMap(&input.itemInfo, node->itemId, input.insertIndex, &input);
 
+			input.generalAverage += node->value;
 			input.data[input.insertIndex] = *node;
 			input.insertIndex++;
 		}
@@ -92,6 +86,25 @@ void readAsInput(std::istream & stream, data_input & input)
 			stream.setstate(std::ios::failbit);
 		}
 	}
+}
+
+void loadMap(unordered_map<string, data_info *> * map, string key, int index, data_input * parent)
+{
+	auto iterator = map->find(key);
+	data_info * info;
+	if (iterator == map->end())
+	{
+		info = new data_info();
+		info->parent = parent;
+		map->insert(pair<string, data_info *>(key, info));		
+	}
+	else
+	{
+		info = iterator->second;
+	}
+	
+	info->indexes.push_back(index);
+	info->count++;
 }
 
 void readAsTarget(std::istream & stream, data_input & input)
@@ -120,4 +133,20 @@ void readAsTarget(std::istream & stream, data_input & input)
 			stream.setstate(std::ios::failbit);
 		}
 	}
+}
+
+float data_info::getAverage()
+{
+	if (average == 0)
+	{
+		float sum = 0;
+		int valueIndex;
+		for (int i = 0; i < count; i++)
+		{
+			valueIndex = indexes[i];
+			sum += ((data_input *)parent)->data[valueIndex].value;
+		}
+		average = sum / count;
+	}
+	return average;
 }
