@@ -4,7 +4,7 @@
 
 GenericSolver::GenericSolver(data_input * inputPtr)
 {
-	input = inputPtr;
+	input = inputPtr;	
 }
 
 void GenericSolver::solve( data_input * target, vector<int> selectedIndexes)
@@ -19,6 +19,23 @@ void GenericSolver::solve( data_input * target, vector<int> selectedIndexes)
 		fout << node.userId <<":"<< node.itemId<< ","<< node.value << std::endl;
 	}
 	fout.close();
+}
+
+float GenericSolver::getBlindGuess(string targetUser, string targetItem)
+{
+	auto userIterator = input->userInfo.find(targetUser);
+	if (userIterator == input->userInfo.end())
+	{
+		//o usuário não tem notas, o chute escolhido será a média do item
+		auto itemIterator = input->itemInfo.find(targetItem);
+		if (itemIterator == input->itemInfo.end())
+		{
+			//não tem nem o usuário nem o item no treino, o chute será a média geral
+			return input->generalAverage;
+		}
+		return itemIterator->second->getAverage();
+	}
+	return 0.0f;
 }
 
 ConstantOutputSolver::ConstantOutputSolver(data_input * input) : GenericSolver(input){}

@@ -12,9 +12,10 @@ class GenericSolver : public ISolver
 {
 public:
 	GenericSolver(data_input * input);
-	virtual void solve(data_input * target, vector<int> selectedIndexes = vector<int>(0)) override;
+	virtual void solve(data_input * target, vector<int> selectedIndexes = vector<int>(0)) override;	
 protected:
 	data_input * input;
+	float getBlindGuess(string targetUser, string targetItem);
 };
 
 class ConstantOutputSolver : public GenericSolver

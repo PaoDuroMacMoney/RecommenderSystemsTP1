@@ -15,8 +15,12 @@ struct data_node
 
 struct neighboor
 {
-	float similarity;
-	float value;
+	double numeratorTemp =0;
+	double denominatorTemp1 =0;
+	double denominatorTemp2 =0;
+	double similarity =0;
+	float value =0;
+	float commonRates =0;
 };
 
 class data_info
@@ -25,13 +29,11 @@ public:
 	float getAverage();
 	void normalize();
 	float denormalize(float score);
-
-	vector<int> indexes;
-	int count;	
-	void * parent;
+	int count =0;	
+	vector<data_node*> ratedList;
 private:
-	float getStdDeviation();
-	float average;
+	float getStdDeviation();	
+	float average =0;
 	float std_deviation=-1;
 };
 
@@ -40,20 +42,19 @@ class data_input
 	friend std::istream & operator>>(std::istream & stream, data_input & input);
 
 public:
-	void normalizeUsers();
-	vector<neighboor> getNeighboorsForItem(string userId,string itemId);
+	void normalizeUsers();	
 	unordered_map <string, data_info *> userInfo;
 	unordered_map <string, data_info *> itemInfo;
 	int length;
 	data_node * data;
 	bool isTarget;
 	int insertIndex;
-	float generalAverage;
+	float generalAverage =0;
 };
 
-data_input * read_input(char const * path, bool isTarget = false);
+data_input * read_input(char const * path,int size = 0, bool isTarget = false);
 
-void loadMap(unordered_map<string, data_info *> * map, string key, int index, data_input * parent);
+void loadMap(unordered_map<string, data_info *> * map, string key, data_node * node);
 void readAsTarget(std::istream & stream, data_input & input);
 void readAsInput(std::istream & stream, data_input & input);
 

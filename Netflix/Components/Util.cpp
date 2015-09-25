@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <sstream> 
 
-data_input * read_input(char const *path, bool isTarget)
+data_input * read_input(char const *path, int size, bool isTarget)
 {
 	data_input * input = new data_input;
 
@@ -18,9 +18,16 @@ data_input * read_input(char const *path, bool isTarget)
 
 	std::cout << "Counting lines" << endl;
 
-	while (getline(myfile, line))
-		input->length++;
-	input->length--; //remove header from count
+	if (size == 0)
+	{
+		while (getline(myfile, line))
+			input->length++;
+		input->length--; //remove header from count
+	}
+	else
+	{
+		input->length = size;
+	}
 
 	std::cout << input->length << " lines" << endl;
 
@@ -74,8 +81,8 @@ void readAsInput(std::istream & stream, data_input & input)
 			node->value = stof(value);
 			node->timestamp = stoi(timestamp);
 
-			loadMap(&input.userInfo, node->userId, input.insertIndex, &input);
-			loadMap(&input.itemInfo, node->itemId, input.insertIndex, &input);
+			loadMap(&input.userInfo, node->userId, node);
+			loadMap(&input.itemInfo, node->itemId, node);
 
 			input.generalAverage += node->value;
 			input.data[input.insertIndex] = *node;
@@ -88,14 +95,13 @@ void readAsInput(std::istream & stream, data_input & input)
 	}
 }
 
-void loadMap(unordered_map<string, data_info *> * map, string key, int index, data_input * parent)
+void loadMap(unordered_map<string, data_info *> * map, string key, data_node * node)
 {
 	auto iterator = map->find(key);
 	data_info * info;
 	if (iterator == map->end())
 	{
 		info = new data_info();
-		info->parent = parent;
 		map->insert(pair<string, data_info *>(key, info));		
 	}
 	else
@@ -103,7 +109,7 @@ void loadMap(unordered_map<string, data_info *> * map, string key, int index, da
 		info = iterator->second;
 	}
 	
-	info->indexes.push_back(index);
+	info->ratedList.push_back(node);
 	info->count++;
 }
 
@@ -140,11 +146,9 @@ float data_info::getAverage()
 	if (average == 0)
 	{
 		float sum = 0;
-		int valueIndex;
 		for (int i = 0; i < count; i++)
 		{
-			valueIndex = indexes[i];
-			sum += ((data_input *)parent)->data[valueIndex].value;
+			sum += ratedList[i]->value;
 		}
 		average = sum / count;
 	}
@@ -159,11 +163,10 @@ void data_info::normalize()
 	int valueIndex;
 	for (int i = 0; i < count; i++)
 	{
-		valueIndex = indexes[i];
-		((data_input *)parent)->data[valueIndex].value -= average;
+		ratedList[i]->value -= average;
 		if (std_deviation != 0)
 		{
-			((data_input *)parent)->data[valueIndex].value /= std_deviation;
+			ratedList[i]->value /= std_deviation;
 		}
 	}
 }
@@ -182,11 +185,9 @@ float data_info::getStdDeviation()
 	if (std_deviation == -1)
 	{
 		float sum = 0, mean = getAverage(), deviation;
-		int valueIndex;
 		for (int i = 0; i < count; i++)
 		{
-			valueIndex = indexes[i];
-			deviation = ((data_input *)parent)->data[valueIndex].value - mean;
+			deviation = ratedList[i]->value - mean;
 			sum += deviation * deviation;
 		}
 		std_deviation = sqrt(sum);
@@ -202,7 +203,3 @@ void data_input::normalizeUsers()
 	}
 }
 
-vector<neighboor> data_input::getNeighboorsForItem(string userId, string itemId)
-{
-	return vector<neighboor>();
-}
