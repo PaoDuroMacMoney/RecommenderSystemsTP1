@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <sstream> 
 
-data_input * read_input(char const *path, int size, bool isTarget)
+data_input * read_input(char const *path, int size, bool isTarget, vector<int> * selection)
 {
 	data_input * input = new data_input;
 
@@ -40,7 +40,11 @@ data_input * read_input(char const *path, int size, bool isTarget)
 
 	std::cout << "Loading data to memory" << endl;
 
-	while (infile >> *input){}
+	int i = 0;
+	while (infile >> *input)
+	{
+		i++;
+	}
 	input->generalAverage = input->generalAverage / input->length;
 
 	std::cout << "Loaded..." << endl;
@@ -175,7 +179,8 @@ float data_info::denormalize(float score)
 {
 	if (std_deviation == 0)
 		return average;
-	return score * std_deviation + average;
+	float result = score * std_deviation + average;
+	return result;
 }
 
 float data_info::getStdDeviation()
@@ -190,16 +195,33 @@ float data_info::getStdDeviation()
 			deviation = ratedList[i]->value - mean;
 			sum += deviation * deviation;
 		}
-		std_deviation = sqrt(sum);
+		std_deviation = sqrt(sum / (count - 1));
 	}
-	return std_deviation / (count - 1);
+	return std_deviation;
 }
 
 void data_input::normalizeUsers()
 {	
+	for (auto iterator = itemInfo.begin(); iterator != itemInfo.end(); iterator++)
+	{
+		iterator->second->getAverage();
+		iterator->second->getStdDeviation();
+	}
 	for (auto iterator = userInfo.begin(); iterator != userInfo.end(); iterator++)
 	{
 		iterator->second->normalize();
 	}
+}
+
+float data_input::getItemRate(string userId, string itemId)
+{	
+	for (unsigned int i = 0; i < userInfo[userId]->ratedList.size(); i++)
+	{
+		if (userInfo[userId]->ratedList[i]->itemId == itemId)
+		{
+			return userInfo[userId]->ratedList[i]->value;
+		}
+	}
+	return FLT_MIN;
 }
 

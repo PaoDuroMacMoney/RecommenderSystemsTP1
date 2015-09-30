@@ -1,6 +1,7 @@
 #include "ColaborativeUserBasedSolver.h"
 #include <iostream>
 #include <algorithm>    // std::min
+#include <math.h>
 
 
 ColaborativeUserBasedSolver::ColaborativeUserBasedSolver(data_input * input) : GenericSolver(input) 
@@ -8,35 +9,48 @@ ColaborativeUserBasedSolver::ColaborativeUserBasedSolver(data_input * input) : G
 	input->normalizeUsers();
 }
 
-vector<neighboor *> ColaborativeUserBasedSolver::getUserNeighboors(data_input * input, string userId, string itemId)
+vector<neighboor *> ColaborativeUserBasedSolver::getUserNeighboors(data_input * input, string targetUser, string targetItem)
 {
-	vector<data_node*> ratedItemsForUser = input->userInfo[userId]->ratedList;
-	unordered_map<string, neighboor *> * neighboors = new unordered_map<string, neighboor *>;
-	for (unsigned int i = 0; i < ratedItemsForUser.size(); i++)
+	vector<data_node*>* ratedItemsForUser = &input->userInfo[targetUser]->ratedList;
+	if (input->userInfo[targetUser]->neighboors == nullptr)
 	{
-		//como já está tudo normalizado o cálculo da similaridade de pearson pode ser simplificado, todos
-		//os termos de média serão 0, e fica equivalente com o cosseno.
-		float targetRating = ratedItemsForUser[i]->value;
-		string itemId = ratedItemsForUser[i]->itemId;
-		vector<data_node*> usersWhoRatedTargetUserItems = input->itemInfo[itemId]->ratedList;
-		for (unsigned int j = 0; j < usersWhoRatedTargetUserItems.size(); j++)
+		unordered_map<string, neighboor *> * neighboors = new unordered_map<string, neighboor *>;
+		for (unsigned int i = 0; i < ratedItemsForUser->size(); i++)
 		{
-			if(true)//tem o target Item)
+			//como já está tudo normalizado o cálculo da similaridade de pearson pode ser simplificado, todos
+			//os termos de média serão 0, e fica equivalente com o cosseno.
+			float targetRating = (*ratedItemsForUser)[i]->value;
+			string ratedItemId = (*ratedItemsForUser)[i]->itemId;
+			for (unsigned int j = 0; j < input->itemInfo[ratedItemId]->ratedList.size(); j++)
 			{
-				float neighboorRate = usersWhoRatedTargetUserItems[j]->value;
-				string neighboorId = usersWhoRatedTargetUserItems[j]->userId;
-				updateNeighboorhood(neighboors, neighboorId, targetRating, neighboorRate);
+				string neighboorId = input->itemInfo[ratedItemId]->ratedList[j]->userId;
+				float neighboorRate = input->itemInfo[ratedItemId]->ratedList[j]->value;
+				if (neighboorId != targetUser && neighboorRate != 0 && targetRating !=0)
+				{
+					updateNeighboorhood(neighboors, neighboorId, targetRating, neighboorRate);
+				}
 			}
+		}
+		input->userInfo[targetUser]->neighboors = neighboors;
+		for (auto iterator = input->userInfo[targetUser]->neighboors->begin();
+			iterator != input->userInfo[targetUser]->neighboors->end(); iterator++)
+		{
+			neighboor * neighboor = iterator->second;
+			neighboor->similarity = neighboor->numeratorTemp / (sqrt(neighboor->denominatorTemp1)*sqrt(neighboor->denominatorTemp2));
+			float cost = std::min(neighboor->commonRates / 50, 1.0f);
+			neighboor->similarity *= cost;
 		}
 	}
 	vector<neighboor *> result;
-	for (auto iterator = neighboors->begin(); iterator != neighboors->end(); iterator++)
+	for (auto iterator = input->userInfo[targetUser]->neighboors->begin(); iterator != input->userInfo[targetUser]->neighboors->end(); iterator++)
 	{
 		neighboor * neighboor = iterator->second;
-		neighboor->similarity = neighboor->numeratorTemp / (sqrt(neighboor->denominatorTemp1)*sqrt(neighboor->denominatorTemp2));
-		float cost = std::min(neighboor->commonRates / 50, 1.0f);
-		neighboor->similarity *= cost;
-		result.push_back(neighboor);
+		float targetItemNeighboorRate = input->getItemRate(neighboor->neighboorId,targetItem);
+		if (targetItemNeighboorRate != FLT_MIN)
+		{
+			neighboor->value = targetItemNeighboorRate;
+			result.push_back(neighboor);
+		}
 	}
 	return result;
 }
@@ -49,6 +63,7 @@ void ColaborativeUserBasedSolver::updateNeighboorhood(unordered_map<string, neig
 	if (iterator == neighboors->end())
 	{
 		neighboorToUpdate = new neighboor;
+		neighboorToUpdate->neighboorId = neighboorId;
 		neighboors->insert(pair<string, neighboor *>(neighboorId, neighboorToUpdate));
 	}
 	else
@@ -84,9 +99,13 @@ float ColaborativeUserBasedSolver::predict(string targetUser, string targetItem)
 	{
 		neighboor * item = neighboors[i];
 		score += item->similarity * item->value;
-		normalizeFactor += item->similarity;
+		normalizeFactor += std::abs(item->similarity);
 	}
 	score = score / normalizeFactor;
 
-	return input->userInfo[targetUser]->denormalize(score);
+	float result = input->userInfo[targetUser]->denormalize(score);
+	float userAverage = input->userInfo[targetUser]->getAverage();
+	float userStdDeviation = input->userInfo[targetUser]->getStdDeviation();
+	float prediction = std::min(10.0f, std::max(1.0f, result));	
+	return prediction;
 }

@@ -16,6 +16,7 @@ void GenericSolver::solve( data_input * target, vector<int> selectedIndexes)
 	{
 		data_node node = target->data[i];
 		node.value = predict(node.userId, node.itemId);
+		std::cout << ++predicted << " Usuário: " << node.userId << ", Item: " << node.itemId << ", predição: " << node.value << std::endl;
 		fout << node.userId <<":"<< node.itemId<< ","<< node.value << std::endl;
 	}
 	fout.close();
@@ -24,16 +25,20 @@ void GenericSolver::solve( data_input * target, vector<int> selectedIndexes)
 float GenericSolver::getBlindGuess(string targetUser, string targetItem)
 {
 	auto userIterator = input->userInfo.find(targetUser);
+	auto itemIterator = input->itemInfo.find(targetItem);
 	if (userIterator == input->userInfo.end())
 	{
-		//o usuário não tem notas, o chute escolhido será a média do item
-		auto itemIterator = input->itemInfo.find(targetItem);
+		//o usuário não tem notas, o chute escolhido será a média do item		
 		if (itemIterator == input->itemInfo.end())
 		{
 			//não tem nem o usuário nem o item no treino, o chute será a média geral
 			return input->generalAverage;
 		}
 		return itemIterator->second->getAverage();
+	}
+	if (itemIterator == input->itemInfo.end())
+	{
+		return userIterator->second->getAverage();
 	}
 	return 0.0f;
 }

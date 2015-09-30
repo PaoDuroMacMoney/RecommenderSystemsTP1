@@ -1,13 +1,14 @@
 #include "CrossValidation.h"
 #include "Util.h"
 #include "MathFuncs.h"
+#include "Solver.h"
 
 #include <algorithm>
 #include <cmath>
 
 using namespace std;
 
-double crossValidation(int folds, data_input * input, float(*predictFunc) (data_input *, string, string, vector<int>))
+double crossValidation(int folds, data_input * input, ISolver &solver)
 {
 	int inputLength = input->length;
 
@@ -32,6 +33,8 @@ double crossValidation(int folds, data_input * input, float(*predictFunc) (data_
 				allButFolder.push_back(shuffled[i]);
 
 		double iterationError = 0;
+		//solver.updateModel(input, allButFolder);
+
 		for (int ii = begin; ii < end; ii++)
 		{
 			int index = shuffled[ii];
@@ -39,7 +42,7 @@ double crossValidation(int folds, data_input * input, float(*predictFunc) (data_
 			string userId = input->data[index].userId;
 			string itemId = input->data[index].itemId;
 
-			float predictedValue = (*predictFunc)(input, userId, itemId, allButFolder);
+			float predictedValue = solver.predict(userId, itemId);
 
 			iterationError += rmse(realValue, predictedValue);
 		}

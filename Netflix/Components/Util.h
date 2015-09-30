@@ -15,6 +15,7 @@ struct data_node
 
 struct neighboor
 {
+	string neighboorId;
 	double numeratorTemp =0;
 	double denominatorTemp1 =0;
 	double denominatorTemp2 =0;
@@ -27,13 +28,14 @@ class data_info
 {
 public:
 	float getAverage();
+	float getStdDeviation();
 	void normalize();
 	float denormalize(float score);
 	int count =0;	
 	vector<data_node*> ratedList;
-private:
-	float getStdDeviation();	
-	float average =0;
+	unordered_map<string, neighboor *> * neighboors = nullptr;
+private:		
+	float average = 0;
 	float std_deviation=-1;
 };
 
@@ -43,6 +45,7 @@ class data_input
 
 public:
 	void normalizeUsers();	
+	float getItemRate(string userId, string itemId);
 	unordered_map <string, data_info *> userInfo;
 	unordered_map <string, data_info *> itemInfo;
 	int length;
@@ -52,7 +55,7 @@ public:
 	float generalAverage =0;
 };
 
-data_input * read_input(char const * path,int size = 0, bool isTarget = false);
+data_input * read_input(char const * path,int size = 0, bool isTarget = false, vector<int> * selection = (vector<int> *)nullptr);
 
 void loadMap(unordered_map<string, data_info *> * map, string key, data_node * node);
 void readAsTarget(std::istream & stream, data_input & input);

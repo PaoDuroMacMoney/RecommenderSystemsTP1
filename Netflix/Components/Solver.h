@@ -16,6 +16,8 @@ public:
 protected:
 	data_input * input;
 	float getBlindGuess(string targetUser, string targetItem);
+private:
+	int predicted = 0;
 };
 
 class ConstantOutputSolver : public GenericSolver
