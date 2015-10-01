@@ -213,15 +213,3 @@ void data_input::normalizeUsers()
 	}
 }
 
-float data_input::getItemRate(string userId, string itemId)
-{	
-	for (unsigned int i = 0; i < userInfo[userId]->ratedList.size(); i++)
-	{
-		if (userInfo[userId]->ratedList[i]->itemId == itemId)
-		{
-			return userInfo[userId]->ratedList[i]->value;
-		}
-	}
-	return FLT_MIN;
-}
-

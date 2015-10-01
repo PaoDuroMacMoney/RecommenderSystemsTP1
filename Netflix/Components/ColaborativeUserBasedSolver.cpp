@@ -12,9 +12,12 @@ ColaborativeUserBasedSolver::ColaborativeUserBasedSolver(data_input * input) : G
 vector<neighboor *> ColaborativeUserBasedSolver::getUserNeighboors(data_input * input, string targetUser, string targetItem)
 {
 	vector<data_node*>* ratedItemsForUser = &input->userInfo[targetUser]->ratedList;
-	if (input->userInfo[targetUser]->neighboors == nullptr)
+	if (lastUser != targetUser)
 	{
-		unordered_map<string, neighboor *> * neighboors = new unordered_map<string, neighboor *>;
+		neighboors->clear();
+		lastUser = targetUser;
+		
+		
 		for (unsigned int i = 0; i < ratedItemsForUser->size(); i++)
 		{
 			//como já está tudo normalizado o cálculo da similaridade de pearson pode ser simplificado, todos
@@ -27,13 +30,12 @@ vector<neighboor *> ColaborativeUserBasedSolver::getUserNeighboors(data_input * 
 				float neighboorRate = input->itemInfo[ratedItemId]->ratedList[j]->value;
 				if (neighboorId != targetUser && neighboorRate != 0 && targetRating !=0)
 				{
-					updateNeighboorhood(neighboors, neighboorId, targetRating, neighboorRate);
+					updateNeighboorhood(neighboors, neighboorId, targetRating, neighboorRate, ratedItemId);
 				}
 			}
 		}
-		input->userInfo[targetUser]->neighboors = neighboors;
-		for (auto iterator = input->userInfo[targetUser]->neighboors->begin();
-			iterator != input->userInfo[targetUser]->neighboors->end(); iterator++)
+		for (auto iterator = neighboors->begin();
+			iterator != neighboors->end(); iterator++)
 		{
 			neighboor * neighboor = iterator->second;
 			neighboor->similarity = neighboor->numeratorTemp / (sqrt(neighboor->denominatorTemp1)*sqrt(neighboor->denominatorTemp2));
@@ -41,14 +43,30 @@ vector<neighboor *> ColaborativeUserBasedSolver::getUserNeighboors(data_input * 
 			neighboor->similarity *= cost;
 		}
 	}
+
+	for (auto iterator = neighboors->begin(); iterator != neighboors->end(); iterator++)
+	{
+		iterator->second->value = FLT_MIN;
+	}
+
+	auto list = input->itemInfo[targetItem]->ratedList;
+	for (int i = 0; i < list.size(); i++)
+	{
+		string key = list[i]->userId;
+		auto iterator = neighboors->find(key);
+		if (iterator != neighboors->end())
+		{
+			iterator->second->value = list[i]->value;
+		}
+	}
+	
 	vector<neighboor *> result;
-	for (auto iterator = input->userInfo[targetUser]->neighboors->begin(); iterator != input->userInfo[targetUser]->neighboors->end(); iterator++)
+	for (auto iterator = neighboors->begin(); iterator != neighboors->end(); iterator++)
 	{
 		neighboor * neighboor = iterator->second;
-		float targetItemNeighboorRate = input->getItemRate(neighboor->neighboorId,targetItem);
-		if (targetItemNeighboorRate != FLT_MIN)
+		string neighboorId = neighboor->neighboorId;
+		if (neighboor->value != FLT_MIN)
 		{
-			neighboor->value = targetItemNeighboorRate;
 			result.push_back(neighboor);
 		}
 	}
@@ -56,7 +74,7 @@ vector<neighboor *> ColaborativeUserBasedSolver::getUserNeighboors(data_input * 
 }
 
 void ColaborativeUserBasedSolver::updateNeighboorhood(unordered_map<string, neighboor *>* neighboors, 
-	string neighboorId, float targetRating, float neighboorRate)
+	string neighboorId, float targetRating, float neighboorRate, string ratedItemId)
 {
 	neighboor * neighboorToUpdate;
 	auto iterator = neighboors->find(neighboorId);

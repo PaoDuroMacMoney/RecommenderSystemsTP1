@@ -16,7 +16,9 @@ void GenericSolver::solve( data_input * target, vector<int> selectedIndexes)
 	{
 		data_node node = target->data[i];
 		node.value = predict(node.userId, node.itemId);
-		std::cout << ++predicted << " Usuário: " << node.userId << ", Item: " << node.itemId << ", predição: " << node.value << std::endl;
+		//std::cout << ++predicted << " User: " << node.userId << ", Item: " << node.itemId << ", prediction: " << node.value << std::endl;
+		if(++predicted % 1000 == 0)
+			std::cout << predicted << " predictions done" << std::endl;
 		fout << node.userId <<":"<< node.itemId<< ","<< node.value << std::endl;
 	}
 	fout.close();

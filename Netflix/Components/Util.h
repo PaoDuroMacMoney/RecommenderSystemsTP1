@@ -32,8 +32,7 @@ public:
 	void normalize();
 	float denormalize(float score);
 	int count =0;	
-	vector<data_node*> ratedList;
-	unordered_map<string, neighboor *> * neighboors = nullptr;
+	vector<data_node*> ratedList;	
 private:		
 	float average = 0;
 	float std_deviation=-1;
@@ -45,7 +44,6 @@ class data_input
 
 public:
 	void normalizeUsers();	
-	float getItemRate(string userId, string itemId);
 	unordered_map <string, data_info *> userInfo;
 	unordered_map <string, data_info *> itemInfo;
 	int length;
