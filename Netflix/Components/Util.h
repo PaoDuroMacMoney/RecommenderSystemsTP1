@@ -29,7 +29,10 @@ class data_info
 public:
 	float getAverage();
 	float getStdDeviation();
+	void resetAverage();
+	void resetStdDeviation();
 	void normalize();
+	void denormalize();
 	float denormalize(float score);
 	int count =0;	
 	vector<data_node*> ratedList;	
@@ -43,7 +46,8 @@ class data_input
 	friend std::istream & operator>>(std::istream & stream, data_input & input);
 
 public:
-	void normalizeUsers();	
+	void normalizeUsers();
+	void denormalizeUsers();
 	unordered_map <string, data_info *> userInfo;
 	unordered_map <string, data_info *> itemInfo;
 	int length;

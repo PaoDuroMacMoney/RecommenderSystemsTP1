@@ -35,8 +35,8 @@ float crossValidation(int folds, data_input * input, ISolver &solver)
 		int end = min(begin + foldInstances, inputLength);
 
 		//separate data outside folder for training, and on folder for validation
-		vector<int> allButFolder;
-		vector<int> folder;
+		vector<int> allButFolder(0);
+		vector<int> folder(0);
 		for (int i = 0; i < inputLength; i++)
 			if(i >= begin && i < end)
 				folder.push_back(shuffled[i]);
@@ -49,22 +49,24 @@ float crossValidation(int folds, data_input * input, ISolver &solver)
 		solver.beforePredict();
 		double iterationError = 0;
 
-		int contador = 0;
+		int index;
+		float realValue, predictedValue, diff;
+		string userId, itemId;
 		for (unsigned int ii = 0; ii < folder.size(); ii++)
 		{
-			if (++contador % 1000 == 0)
-				std::cout << contador << " predictions done" << std::endl;
-			int index = folder[ii];
-			float realValue = input->data[index].value;			
-			string userId = input->data[index].userId;
-			string itemId = input->data[index].itemId;
+			index = folder[ii];
+			realValue = input->data[index].value;
+			userId = input->data[index].userId;
+			itemId = input->data[index].itemId;
 
-			float predictedValue = solver.predict(userId, itemId);
-
-			iterationError += rmse(realValue, predictedValue);
+			predictedValue = solver.predict(userId, itemId);
+			diff = realValue - predictedValue;
+			iterationError += diff * diff;
 		}
-		totalError += iterationError;
-		std::cout << "folder " << fold <<" error = "<< iterationError << std::endl;
+		float rmse = std::sqrt(iterationError / (float)folder.size());
+		totalError += rmse;
+		std::cout << "folder " << fold <<" error = "<< rmse << std::endl;
+		crossValidationInput->denormalizeUsers();
 	}
-	return totalError / inputLength;
+	return totalError / folds;
 }

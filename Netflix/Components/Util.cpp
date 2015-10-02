@@ -170,6 +170,11 @@ float data_info::getAverage()
 	return average;
 }
 
+void data_info::resetStdDeviation()
+{
+	std_deviation = 0;
+}
+
 void data_info::normalize()
 {
 	average = getAverage();
@@ -183,6 +188,23 @@ void data_info::normalize()
 			ratedList[i]->value /= std_deviation;
 		}
 	}
+}
+
+void data_info::denormalize()
+{
+	average = getAverage();
+	std_deviation = getStdDeviation();
+
+	for (int i = 0; i < count; i++)
+	{		
+		if (std_deviation != 0)
+		{
+			ratedList[i]->value *= std_deviation;
+		}
+		ratedList[i]->value += average;
+	}
+	average = 0;
+	std_deviation = 0;
 }
 
 float data_info::denormalize(float score)
@@ -208,6 +230,24 @@ float data_info::getStdDeviation()
 		std_deviation = sqrt(sum / (count - 1));
 	}
 	return std_deviation;
+}
+
+void data_info::resetAverage()
+{
+	average = 0;
+}
+
+void data_input::denormalizeUsers()
+{
+	for (auto iterator = itemInfo.begin(); iterator != itemInfo.end(); iterator++)
+	{
+		iterator->second->resetAverage();
+		iterator->second->resetStdDeviation();
+	}
+	for (auto iterator = userInfo.begin(); iterator != userInfo.end(); iterator++)
+	{
+		iterator->second->denormalize();
+	}
 }
 
 void data_input::normalizeUsers()
