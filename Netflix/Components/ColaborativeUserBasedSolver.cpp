@@ -4,6 +4,11 @@
 #include <math.h>
 
 
+ColaborativeUserBasedParameters * ColaborativeUserBasedSolver::getParams()
+{
+	return (ColaborativeUserBasedParameters *)parameters;
+}
+
 void ColaborativeUserBasedSolver::beforePredict()
 {
 	input->normalizeUsers();
@@ -132,16 +137,20 @@ float ColaborativeUserBasedSolver::predict(string targetUser, string targetItem)
 	float result = input->userInfo[targetUser]->denormalize(score);
 	float userAverage = input->userInfo[targetUser]->getAverage();
 	float userStdDeviation = input->userInfo[targetUser]->getStdDeviation();
-	float prediction = std::min(10.0f, std::max(1.0f, result));	
+	float minLimit = getParams()->limitByUserMaxMin ? input->userInfo[targetUser]->getMin():1.0f;
+	float maxLimit = getParams()->limitByUserMaxMin ? input->userInfo[targetUser]->getMax():10.0f;
+	float prediction = std::min(maxLimit, std::max(minLimit, result));
 	return prediction;
 }
 
-ColaborativeUserBasedParameters::ColaborativeUserBasedParameters(int neighboorsAmount)
+ColaborativeUserBasedParameters::ColaborativeUserBasedParameters(int neighboorsAmount, bool userMaxMinLimit)
 {
 	neighboors = neighboorsAmount;
+	limitByUserMaxMin = userMaxMinLimit;
 }
 
-void ColaborativeUserBasedParameters::update(int neighboorsAmount)
+void ColaborativeUserBasedParameters::update(int neighboorsAmount, bool userMaxMinLimit)
 {
 	neighboors = neighboorsAmount;
+	limitByUserMaxMin = userMaxMinLimit;
 }

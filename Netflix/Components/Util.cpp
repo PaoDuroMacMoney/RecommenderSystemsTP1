@@ -123,7 +123,7 @@ void loadMap(unordered_map<string, data_info *> * map, string key, data_node * n
 	{
 		info = iterator->second;
 	}
-	
+	info->updateMaxMin(node->value);
 	info->ratedList.push_back(node);
 	info->count++;
 }
@@ -170,11 +170,6 @@ float data_info::getAverage()
 	return average;
 }
 
-void data_info::resetStdDeviation()
-{
-	std_deviation = 0;
-}
-
 void data_info::normalize()
 {
 	average = getAverage();
@@ -203,8 +198,19 @@ void data_info::denormalize()
 		}
 		ratedList[i]->value += average;
 	}
-	average = 0;
-	std_deviation = 0;
+	resetValues();
+}
+
+void data_info::updateMaxMin(float value)
+{
+	if (value < min)
+	{
+		min = value;
+	}
+	if (value > max)
+	{
+		max = value;
+	}
 }
 
 float data_info::denormalize(float score)
@@ -232,17 +238,29 @@ float data_info::getStdDeviation()
 	return std_deviation;
 }
 
-void data_info::resetAverage()
+float data_info::getMax()
+{
+	return max;
+}
+
+float data_info::getMin()
+{
+	return min;
+}
+
+void data_info::resetValues()
 {
 	average = 0;
+	std_deviation = 0;
+	max = 1;
+	min = 10;
 }
 
 void data_input::denormalizeUsers()
 {
 	for (auto iterator = itemInfo.begin(); iterator != itemInfo.end(); iterator++)
 	{
-		iterator->second->resetAverage();
-		iterator->second->resetStdDeviation();
+		iterator->second->resetValues();
 	}
 	for (auto iterator = userInfo.begin(); iterator != userInfo.end(); iterator++)
 	{

@@ -29,14 +29,18 @@ class data_info
 public:
 	float getAverage();
 	float getStdDeviation();
-	void resetAverage();
-	void resetStdDeviation();
+	float getMax();
+	float getMin();
+	void resetValues();
 	void normalize();
 	void denormalize();
+	void updateMaxMin(float value);
 	float denormalize(float score);
 	int count =0;	
 	vector<data_node*> ratedList;	
 private:		
+	float min = 10;
+	float max = 1;
 	float average = 0;
 	float std_deviation=-1;
 };

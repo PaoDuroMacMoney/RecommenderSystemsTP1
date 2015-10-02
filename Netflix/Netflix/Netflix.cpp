@@ -15,7 +15,7 @@ int main()
 	data_input * input = read_input("ratings.csv");
 	data_input * target = read_input("targets.csv", true);
 	
-	ColaborativeUserBasedParameters * params = new ColaborativeUserBasedParameters(20);
+	ColaborativeUserBasedParameters * params = new ColaborativeUserBasedParameters(20, false);
 	ISolver * solver = new ColaborativeUserBasedSolver(input, params);
 
 	//solver->solve(target);
@@ -23,10 +23,10 @@ int main()
 	float iterationRmse;
 	float bestIterationRmse = FLT_MAX;
 	int bestNeighboorhoodSelection = 0;
-	for (int i = 15; i < 30; i++)
+	for (int i = 0; i < 2; i++)
 	{
-		iterationRmse = crossValidation(5, input, *solver);
-		params->update(i);
+		params->update(i, i == 0);
+		iterationRmse = crossValidation(5, input, *solver);		
 		if (iterationRmse < bestIterationRmse)
 		{
 			bestIterationRmse = iterationRmse;
