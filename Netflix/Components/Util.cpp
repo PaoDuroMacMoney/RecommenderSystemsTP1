@@ -164,7 +164,6 @@ void data_info::normalize()
 	average = getAverage();
 	std_deviation = getStdDeviation();
 
-	int valueIndex;
 	for (int i = 0; i < count; i++)
 	{
 		ratedList[i]->value -= average;

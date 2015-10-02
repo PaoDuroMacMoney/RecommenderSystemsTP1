@@ -16,12 +16,12 @@ struct data_node
 struct neighboor
 {
 	string neighboorId;
-	double numeratorTemp =0;
-	double denominatorTemp1 =0;
-	double denominatorTemp2 =0;
-	double similarity =0;
+	float numeratorTemp =0;
+	float denominatorTemp1 =0;
+	float denominatorTemp2 =0;
+	float similarity =0;
 	float value =0;
-	float commonRates =0;
+	int commonRates =0;
 };
 
 class data_info

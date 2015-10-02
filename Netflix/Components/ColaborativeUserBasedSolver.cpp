@@ -39,7 +39,7 @@ vector<neighboor *> ColaborativeUserBasedSolver::getUserNeighboors(data_input * 
 		{
 			neighboor * neighboor = iterator->second;
 			neighboor->similarity = neighboor->numeratorTemp / (sqrt(neighboor->denominatorTemp1)*sqrt(neighboor->denominatorTemp2));
-			float cost = std::min(neighboor->commonRates / 50, 1.0f);
+			float cost = std::min((float)(neighboor->commonRates) / 50.0f, 1.0f);
 			neighboor->similarity *= cost;
 		}
 	}
@@ -112,7 +112,7 @@ float ColaborativeUserBasedSolver::predict(string targetUser, string targetItem)
 		//o chute será a média do usuário
 		return input->userInfo[targetUser]->getAverage();
 	}
-	double score = 0, normalizeFactor = 0;
+	float score = 0, normalizeFactor = 0;
 	for (unsigned  int i = 0; i < neighboors.size(); i++)
 	{
 		neighboor * item = neighboors[i];
