@@ -53,9 +53,9 @@ public:
 	float generalAverage =0;
 };
 
-data_input * read_input(char const * path,int size = 0, bool isTarget = false, vector<int> * selection = (vector<int> *)nullptr);
+data_input * read_input(char const * path, bool isTarget = false);
 
 void loadMap(unordered_map<string, data_info *> * map, string key, data_node * node);
 void readAsTarget(std::istream & stream, data_input & input);
 void readAsInput(std::istream & stream, data_input & input);
-
+data_input * select_input(data_input * completeInput, vector<int> * allButFolder);

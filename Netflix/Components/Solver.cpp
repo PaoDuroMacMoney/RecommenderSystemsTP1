@@ -2,16 +2,17 @@
 #include <fstream>
 #include <iostream>
 
-GenericSolver::GenericSolver(data_input * inputPtr)
+GenericSolver::GenericSolver(data_input * inputPtr, Parameters * parametersPtr)
 {
 	input = inputPtr;	
+	parameters = parametersPtr;
 }
 
-void GenericSolver::solve( data_input * target, vector<int> selectedIndexes)
+void GenericSolver::solve( data_input * target)
 {
 	std::ofstream fout("submission.csv");
 	fout << "UserId:ItemId,Prediction"<< std::endl;
-
+	beforePredict();
 	for (int i = 0; i < target->length; i++)
 	{
 		data_node node = target->data[i];
@@ -22,6 +23,13 @@ void GenericSolver::solve( data_input * target, vector<int> selectedIndexes)
 		fout << node.userId <<":"<< node.itemId<< ","<< node.value << std::endl;
 	}
 	fout.close();
+}
+
+void GenericSolver::beforePredict(){}
+
+void GenericSolver::updateInput(data_input * newInput)
+{
+	input = newInput;
 }
 
 float GenericSolver::getBlindGuess(string targetUser, string targetItem)

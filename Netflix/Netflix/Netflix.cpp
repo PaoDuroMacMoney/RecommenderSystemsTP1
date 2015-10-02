@@ -5,17 +5,37 @@
 #include "..\Components\Util.h"
 #include "..\Components\Solver.h"
 #include "..\Components\ColaborativeUserBasedSolver.h"
+#include "..\Components\CrossValidation.h"
 #include <iostream>
 using namespace std;
 
 
 int main()
 {
-	data_input * input = read_input("ratings.csv", 336672);
-	//data_input * target = read_input("targets.csv", 77276, true);
-	data_input * target = read_input("targets.csv", 0, true);
+	data_input * input = read_input("ratings.csv");
+	data_input * target = read_input("targets.csv", true);
+	
+	ColaborativeUserBasedParameters * params = new ColaborativeUserBasedParameters(20);
+	ISolver * solver = new ColaborativeUserBasedSolver(input, params);
 
-	ISolver * solver = new ColaborativeUserBasedSolver(input);
+	//solver->solve(target);
+
+	float iterationRmse;
+	float bestIterationRmse = FLT_MAX;
+	int bestNeighboorhoodSelection = 0;
+	for (int i = 15; i < 30; i++)
+	{
+		iterationRmse = crossValidation(5, input, *solver);
+		params->update(i);
+		if (iterationRmse < bestIterationRmse)
+		{
+			bestIterationRmse = iterationRmse;
+			bestNeighboorhoodSelection = i;
+		}
+		std::cout << "rmse = " << iterationRmse << " for " << i << " neighboors" << std::endl;
+	}
+
+	std::cout << "best neighboorhood selection = " << bestNeighboorhoodSelection << std::endl;
 	solver->solve(target);
 	return 0;
 }

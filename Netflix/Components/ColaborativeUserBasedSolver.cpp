@@ -4,20 +4,28 @@
 #include <math.h>
 
 
-ColaborativeUserBasedSolver::ColaborativeUserBasedSolver(data_input * input) : GenericSolver(input) 
+void ColaborativeUserBasedSolver::beforePredict()
 {
 	input->normalizeUsers();
 }
 
+ColaborativeUserBasedSolver::ColaborativeUserBasedSolver(data_input * input, Parameters * params)
+	: GenericSolver(input, params)
+{	
+}
+
 vector<neighboor *> ColaborativeUserBasedSolver::getUserNeighboors(data_input * input, string targetUser, string targetItem)
 {
-	vector<data_node*>* ratedItemsForUser = &input->userInfo[targetUser]->ratedList;
 	if (lastUser != targetUser)
 	{
+		for (auto iterator = neighboors->begin(); iterator != neighboors->end(); iterator++)
+		{
+			delete iterator->second;
+		}
 		neighboors->clear();
 		lastUser = targetUser;
 		
-		
+		vector<data_node*>* ratedItemsForUser = &input->userInfo[targetUser]->ratedList;		
 		for (unsigned int i = 0; i < ratedItemsForUser->size(); i++)
 		{
 			//como já está tudo normalizado o cálculo da similaridade de pearson pode ser simplificado, todos
@@ -34,8 +42,8 @@ vector<neighboor *> ColaborativeUserBasedSolver::getUserNeighboors(data_input * 
 				}
 			}
 		}
-		for (auto iterator = neighboors->begin();
-			iterator != neighboors->end(); iterator++)
+
+		for (auto iterator = neighboors->begin(); iterator != neighboors->end(); iterator++)
 		{
 			neighboor * neighboor = iterator->second;
 			neighboor->similarity = neighboor->numeratorTemp / (sqrt(neighboor->denominatorTemp1)*sqrt(neighboor->denominatorTemp2));
@@ -126,4 +134,14 @@ float ColaborativeUserBasedSolver::predict(string targetUser, string targetItem)
 	float userStdDeviation = input->userInfo[targetUser]->getStdDeviation();
 	float prediction = std::min(10.0f, std::max(1.0f, result));	
 	return prediction;
+}
+
+ColaborativeUserBasedParameters::ColaborativeUserBasedParameters(int neighboorsAmount)
+{
+	neighboors = neighboorsAmount;
+}
+
+void ColaborativeUserBasedParameters::update(int neighboorsAmount)
+{
+	neighboors = neighboorsAmount;
 }

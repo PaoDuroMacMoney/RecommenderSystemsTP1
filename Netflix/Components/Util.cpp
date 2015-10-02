@@ -6,7 +6,28 @@
 #include <unordered_map>
 #include <sstream> 
 
-data_input * read_input(char const *path, int size, bool isTarget, vector<int> * selection)
+data_input * select_input(data_input * completeInput, vector<int> * allButFolder)
+{
+	data_input * filteredInput = new data_input;
+	filteredInput->length = allButFolder->size();
+	filteredInput->data = new data_node[filteredInput->length];
+
+	for (unsigned int i = 0; i < allButFolder->size(); i++)
+	{
+		int selectedIndex = allButFolder->at(i);
+		data_node * itemToAdd = &completeInput->data[selectedIndex];
+
+		filteredInput->generalAverage += itemToAdd->value;
+		filteredInput->data[i] = * itemToAdd;
+
+		loadMap(&filteredInput->userInfo, itemToAdd->userId, itemToAdd);
+		loadMap(&filteredInput->itemInfo, itemToAdd->itemId, itemToAdd);		
+	}
+	filteredInput->generalAverage = filteredInput->generalAverage / filteredInput->length;
+	return filteredInput;
+}
+
+data_input * read_input(char const *path, bool isTarget)
 {
 	data_input * input = new data_input;
 
@@ -17,17 +38,10 @@ data_input * read_input(char const *path, int size, bool isTarget, vector<int> *
 	ifstream myfile(path);
 
 	std::cout << "Counting lines" << endl;
-
-	if (size == 0)
-	{
-		while (getline(myfile, line))
-			input->length++;
-		input->length--; //remove header from count
-	}
-	else
-	{
-		input->length = size;
-	}
+	
+	while (getline(myfile, line))
+		input->length++;
+	input->length--; //remove header from count
 
 	std::cout << input->length << " lines" << endl;
 
@@ -40,11 +54,8 @@ data_input * read_input(char const *path, int size, bool isTarget, vector<int> *
 
 	std::cout << "Loading data to memory" << endl;
 
-	int i = 0;
-	while (infile >> *input)
-	{
-		i++;
-	}
+	while (infile >> *input){}
+
 	input->generalAverage = input->generalAverage / input->length;
 
 	std::cout << "Loaded..." << endl;
