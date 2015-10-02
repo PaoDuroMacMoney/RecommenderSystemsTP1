@@ -9,8 +9,14 @@
 
 using namespace std;
 
+bool compareUsers(int i, int j) 
+{ 
+	return g_originalInput->data[i].userId < g_originalInput->data[j].userId;
+}
+
 float crossValidation(int folds, data_input * input, ISolver &solver)
 {
+	g_originalInput = input;
 	int inputLength = input->length;
 
 	//create shuffled positions array
@@ -36,7 +42,7 @@ float crossValidation(int folds, data_input * input, ISolver &solver)
 				folder.push_back(shuffled[i]);
 			else
 				allButFolder.push_back(shuffled[i]);
-		std::sort(folder.begin(), folder.end());
+		std::sort(folder.begin(), folder.end(), compareUsers);
 
 		data_input * crossValidationInput = select_input(input, &allButFolder);
 		solver.updateInput(crossValidationInput);
