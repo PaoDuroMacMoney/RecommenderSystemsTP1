@@ -2,7 +2,15 @@
 #include "Solver.h"
 #include "Util.h"
 
-static data_input * g_originalInput;
-
-float crossValidation(int folds, data_input * input, ISolver &solver);
-bool compareUsers(int i, int j);
+class CrossValidation
+{
+public :
+	CrossValidation(int folds, data_input * input, ISolver * solver);
+	
+	float run();
+private:
+	int folds;
+	data_input * originalInput;
+	ISolver * currentSolver;
+	bool compareFunc(int i, int j);
+};

@@ -1,23 +1,22 @@
 #include "CrossValidation.h"
 #include "Util.h"
-#include "MathFuncs.h"
 #include "Solver.h"
 #include <iostream>
 
 #include <algorithm>
 #include <cmath>
+#include <functional>
 
 using namespace std;
 
-bool compareUsers(int i, int j) 
+bool CrossValidation::compareFunc(int i, int j)
 { 
-	return g_originalInput->data[i].userId < g_originalInput->data[j].userId;
+	return currentSolver->compareFunc(originalInput, i, j);
 }
 
-float crossValidation(int folds, data_input * input, ISolver &solver)
+float CrossValidation::run()
 {
-	g_originalInput = input;
-	int inputLength = input->length;
+	int inputLength = originalInput->length;
 
 	//create shuffled positions array
 	vector<int> shuffled(inputLength);
@@ -26,7 +25,7 @@ float crossValidation(int folds, data_input * input, ISolver &solver)
 	random_shuffle(shuffled.begin(), shuffled.end());
 
 	//iterate folders
-	double totalError = 0;
+	float totalError = 0;
 	int foldInstances = inputLength / folds;
 	for (int fold = 0; fold < folds; fold++)
 	{
@@ -42,31 +41,45 @@ float crossValidation(int folds, data_input * input, ISolver &solver)
 				folder.push_back(shuffled[i]);
 			else
 				allButFolder.push_back(shuffled[i]);
-		std::sort(folder.begin(), folder.end(), compareUsers);
+		std::sort(folder.begin(), folder.end(), std::bind(&CrossValidation::compareFunc,this,
+			std::placeholders::_1,std::placeholders::_2));
 
-		data_input * crossValidationInput = select_input(input, &allButFolder);
-		solver.updateInput(crossValidationInput);
-		solver.beforePredict();
-		double iterationError = 0;
+		data_input * crossValidationInput = select_input(originalInput, &allButFolder);
+		currentSolver->updateInput(crossValidationInput);
+		currentSolver->beforePredict();
+		float iterationError = 0;
 
 		int index;
 		float realValue, predictedValue, diff;
 		string userId, itemId;
 		for (unsigned int ii = 0; ii < folder.size(); ii++)
 		{
+			//if (ii % 1000 == 0)
+			//	std::cout << ii << " predictions done" << std::endl;
 			index = folder[ii];
-			realValue = input->data[index].value;
-			userId = input->data[index].userId;
-			itemId = input->data[index].itemId;
+			realValue = originalInput->data[index].value;
+			userId = originalInput->data[index].userId;
+			itemId = originalInput->data[index].itemId;
 
-			predictedValue = solver.predict(userId, itemId);
+			predictedValue = currentSolver->predict(userId, itemId);
 			diff = realValue - predictedValue;
 			iterationError += diff * diff;
 		}
 		float rmse = std::sqrt(iterationError / (float)folder.size());
 		totalError += rmse;
+		currentSolver->afterPredict();
 		std::cout << "folder " << fold <<" error = "<< rmse << std::endl;
-		crossValidationInput->denormalizeUsers();
 	}
-	return totalError / folds;
+	float result = totalError / folds;
+	std::cout << "RMSE = " << result << " for " << currentSolver->printParams() << std::endl;
+	std::cout << std::endl;
+	return result;
 }
+
+CrossValidation::CrossValidation(int folders, data_input * input,ISolver * solver)
+{
+	folds = folders;
+	originalInput = input;
+	currentSolver = solver;
+}
+

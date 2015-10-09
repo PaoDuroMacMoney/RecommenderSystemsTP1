@@ -2,18 +2,18 @@
 #include "ColaborativeSolver.h"
 #include <unordered_map>
 
-class ColaborativeUserBasedParameters : public ColaborativeParameters
+class ColaborativeItemBasedParameters : public ColaborativeParameters
 {
 public:
-	ColaborativeUserBasedParameters(int neighboorsAmount, float accuracyThresholdValue);
-
+	ColaborativeItemBasedParameters(int neighboorsAmount, float accuracyThresholdValue);
+	
 	virtual string getAlgorithmName() override;
 };
 
-class ColaborativeUserBasedSolver : public ColaborativeSolver
+class ColaborativeItemBasedSolver : public ColaborativeSolver
 {
 public:
-	ColaborativeUserBasedSolver(data_input * input, Parameters * params);
+	ColaborativeItemBasedSolver(data_input * input, Parameters * params);
 protected:
 	virtual string chooseMainDimension(string userId, string itemId) override;
 	virtual string chooseAuxDimension(string userId, string itemId) override;

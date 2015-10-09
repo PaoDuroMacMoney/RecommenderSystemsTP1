@@ -15,18 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Normalization.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Similarity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Estimative.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MathFuncs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CrossValidation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -39,20 +27,14 @@
     <ClInclude Include="ColaborativeUserBasedSolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ColaborativeItemBasedSolver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ColaborativeSolver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Normalization.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Similarity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Estimative.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MathFuncs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CrossValidation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -63,6 +45,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ColaborativeUserBasedSolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ColaborativeItemBasedSolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ColaborativeSolver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

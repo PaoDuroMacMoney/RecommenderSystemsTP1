@@ -1,156 +1,45 @@
 #include "ColaborativeUserBasedSolver.h"
 #include <iostream>
-#include <algorithm>    // std::min
+#include <algorithm>   
 #include <math.h>
-
-
-ColaborativeUserBasedParameters * ColaborativeUserBasedSolver::getParams()
-{
-	return (ColaborativeUserBasedParameters *)parameters;
-}
-
-void ColaborativeUserBasedSolver::beforePredict()
-{
-	input->normalizeUsers();
-}
+#include <sstream>
 
 ColaborativeUserBasedSolver::ColaborativeUserBasedSolver(data_input * input, Parameters * params)
-	: GenericSolver(input, params)
-{	
+	: ColaborativeSolver(input, params)
+{
 }
 
-vector<neighboor *> ColaborativeUserBasedSolver::getUserNeighboors(data_input * input, string targetUser, string targetItem)
+string ColaborativeUserBasedSolver::chooseMainDimension(string userId, string itemId)
 {
-	if (lastUser != targetUser)
-	{
-		for (auto iterator = neighboors->begin(); iterator != neighboors->end(); iterator++)
-		{
-			delete iterator->second;
-		}
-		neighboors->clear();
-		lastUser = targetUser;
-		
-		vector<data_node*>* ratedItemsForUser = &input->userInfo[targetUser]->ratedList;		
-		for (unsigned int i = 0; i < ratedItemsForUser->size(); i++)
-		{
-			//como já está tudo normalizado o cálculo da similaridade de pearson pode ser simplificado, todos
-			//os termos de média serão 0, e fica equivalente com o cosseno.
-			float targetRating = (*ratedItemsForUser)[i]->value;
-			string ratedItemId = (*ratedItemsForUser)[i]->itemId;
-			for (unsigned int j = 0; j < input->itemInfo[ratedItemId]->ratedList.size(); j++)
-			{
-				string neighboorId = input->itemInfo[ratedItemId]->ratedList[j]->userId;
-				float neighboorRate = input->itemInfo[ratedItemId]->ratedList[j]->value;
-				if (neighboorId != targetUser && neighboorRate != 0 && targetRating !=0)
-				{
-					updateNeighboorhood(neighboors, neighboorId, targetRating, neighboorRate, ratedItemId);
-				}
-			}
-		}
-
-		for (auto iterator = neighboors->begin(); iterator != neighboors->end(); iterator++)
-		{
-			neighboor * neighboor = iterator->second;
-			neighboor->similarity = neighboor->numeratorTemp / (sqrt(neighboor->denominatorTemp1)*sqrt(neighboor->denominatorTemp2));
-			float cost = std::min((float)(neighboor->commonRates) / 50.0f, 1.0f);
-			neighboor->similarity *= cost;
-		}
-	}
-
-	for (auto iterator = neighboors->begin(); iterator != neighboors->end(); iterator++)
-	{
-		iterator->second->value = FLT_MIN;
-	}
-
-	auto list = input->itemInfo[targetItem]->ratedList;
-	for (int i = 0; i < list.size(); i++)
-	{
-		string key = list[i]->userId;
-		auto iterator = neighboors->find(key);
-		if (iterator != neighboors->end())
-		{
-			iterator->second->value = list[i]->value;
-		}
-	}
-	
-	vector<neighboor *> result;
-	for (auto iterator = neighboors->begin(); iterator != neighboors->end(); iterator++)
-	{
-		neighboor * neighboor = iterator->second;
-		string neighboorId = neighboor->neighboorId;
-		if (neighboor->value != FLT_MIN)
-		{
-			result.push_back(neighboor);
-		}
-	}
-	return result;
+	return userId;
 }
 
-void ColaborativeUserBasedSolver::updateNeighboorhood(unordered_map<string, neighboor *>* neighboors, 
-	string neighboorId, float targetRating, float neighboorRate, string ratedItemId)
+string ColaborativeUserBasedSolver::chooseAuxDimension(string userId, string itemId)
 {
-	neighboor * neighboorToUpdate;
-	auto iterator = neighboors->find(neighboorId);
-	if (iterator == neighboors->end())
-	{
-		neighboorToUpdate = new neighboor;
-		neighboorToUpdate->neighboorId = neighboorId;
-		neighboors->insert(pair<string, neighboor *>(neighboorId, neighboorToUpdate));
-	}
-	else
-	{
-		neighboorToUpdate = iterator->second;
-	}
-
-	neighboorToUpdate->numeratorTemp += (targetRating*neighboorRate);
-	neighboorToUpdate->denominatorTemp1 += (targetRating*targetRating);
-	neighboorToUpdate->denominatorTemp2 += (neighboorRate*neighboorRate);
-
-	neighboorToUpdate->commonRates++;
+	return itemId;
 }
 
-float ColaborativeUserBasedSolver::predict(string targetUser, string targetItem)
+vector<data_node*> * ColaborativeUserBasedSolver::getMainDimensionFunc(string dimensionId)
 {
-	float blindGuess = getBlindGuess(targetUser, targetItem);
-	if (blindGuess != 0) 
-	{
-		//o usuário não tem avaliações chute será a média para o item, 
-		//caso o item não tenha avaliações o chute será a média global.
-		return blindGuess;
-	}
-	vector<neighboor*> neighboors = getUserNeighboors(input, targetUser, targetItem);
-	if (neighboors.size() == 0)
-	{
-		//item não tem avaliações, ou itens que o usuário avaliou não têm vizinhança, 
-		//o chute será a média do usuário
-		return input->userInfo[targetUser]->getAverage();
-	}
-	float score = 0, normalizeFactor = 0;
-	for (unsigned  int i = 0; i < neighboors.size(); i++)
-	{
-		neighboor * item = neighboors[i];
-		score += item->similarity * item->value;
-		normalizeFactor += std::abs(item->similarity);
-	}
-	score = score / normalizeFactor;
-
-	float result = input->userInfo[targetUser]->denormalize(score);
-	float userAverage = input->userInfo[targetUser]->getAverage();
-	float userStdDeviation = input->userInfo[targetUser]->getStdDeviation();
-	float minLimit = getParams()->limitByUserMaxMin ? input->userInfo[targetUser]->getMin():1.0f;
-	float maxLimit = getParams()->limitByUserMaxMin ? input->userInfo[targetUser]->getMax():10.0f;
-	float prediction = std::min(maxLimit, std::max(minLimit, result));
-	return prediction;
+	return &input->userInfo[dimensionId]->ratedList;
 }
 
-ColaborativeUserBasedParameters::ColaborativeUserBasedParameters(int neighboorsAmount, bool userMaxMinLimit)
+vector<data_node*> * ColaborativeUserBasedSolver::getAuxDimensionFunc(string dimensionId)
 {
-	neighboors = neighboorsAmount;
-	limitByUserMaxMin = userMaxMinLimit;
+	return &input->itemInfo[dimensionId]->ratedList;
 }
 
-void ColaborativeUserBasedParameters::update(int neighboorsAmount, bool userMaxMinLimit)
+bool ColaborativeUserBasedSolver::sortBeforeSolveFunc(data_node i, data_node j)
 {
-	neighboors = neighboorsAmount;
-	limitByUserMaxMin = userMaxMinLimit;
+	return i.userId < j.userId;
+}
+
+ColaborativeUserBasedParameters::ColaborativeUserBasedParameters(int neighboorsAmount, float accuracyThresholdValue)
+	:ColaborativeParameters(neighboorsAmount, accuracyThresholdValue)
+{
+}
+
+string ColaborativeUserBasedParameters::getAlgorithmName()
+{
+	return "UserBased";
 }

@@ -1,6 +1,8 @@
 #include "Solver.h"
 #include <fstream>
 #include <iostream>
+#include <algorithm>   
+#include <functional>
 
 GenericSolver::GenericSolver(data_input * inputPtr, Parameters * parametersPtr)
 {
@@ -8,14 +10,29 @@ GenericSolver::GenericSolver(data_input * inputPtr, Parameters * parametersPtr)
 	parameters = parametersPtr;
 }
 
+
+bool GenericSolver::compareFunc(data_input * input, int i, int j)
+{
+	return sortBeforeSolveFunc(input->data[i], input->data[j]);
+}
+
 void GenericSolver::solve( data_input * target)
 {
 	std::ofstream fout("submission.csv");
 	fout << "UserId:ItemId,Prediction"<< std::endl;
 	beforePredict();
+	vector<data_node> sortedNodes;
+
 	for (int i = 0; i < target->length; i++)
 	{
-		data_node node = target->data[i];
+		sortedNodes.push_back(target->data[i]);
+	}
+	std::sort(sortedNodes.begin(), sortedNodes.end(), std::bind(&GenericSolver::sortBeforeSolveFunc, this,
+		std::placeholders::_1, std::placeholders::_2));
+
+	for (int i = 0; i < sortedNodes.size(); i++)
+	{
+		data_node node = sortedNodes[i];
 		node.value = predict(node.userId, node.itemId);
 		//std::cout << ++predicted << " User: " << node.userId << ", Item: " << node.itemId << ", prediction: " << node.value << std::endl;
 		if(++predicted % 1000 == 0)
@@ -23,9 +40,17 @@ void GenericSolver::solve( data_input * target)
 		fout << node.userId <<":"<< node.itemId<< ","<< node.value << std::endl;
 	}
 	fout.close();
+
+	afterPredict();
 }
 
-void GenericSolver::beforePredict(){}
+void GenericSolver::beforePredict() {}
+void GenericSolver::afterPredict() {}
+
+string GenericSolver::printParams()
+{
+	return parameters->print();
+}
 
 void GenericSolver::updateInput(data_input * newInput)
 {
@@ -77,4 +102,9 @@ float UserAveragesSolver::predict( string targetUser, string targetItem)
 		return itemIterator->second->getAverage();
 	}
 	return userIterator->second->getAverage();
+}
+
+string Parameters::print()
+{
+	return "";
 }

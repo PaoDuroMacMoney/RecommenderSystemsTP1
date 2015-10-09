@@ -252,7 +252,7 @@ void data_info::resetValues()
 {
 	average = 0;
 	std_deviation = 0;
-	max = 1;
+	max = 0;
 	min = 10;
 }
 

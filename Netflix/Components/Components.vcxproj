@@ -118,22 +118,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ColaborativeItemBasedSolver.h" />
+    <ClInclude Include="ColaborativeSolver.h" />
     <ClInclude Include="ColaborativeUserBasedSolver.h" />
     <ClInclude Include="CrossValidation.h" />
-    <ClInclude Include="Estimative.h" />
-    <ClInclude Include="MathFuncs.h" />
-    <ClInclude Include="Normalization.h" />
-    <ClInclude Include="Similarity.h" />
     <ClInclude Include="Solver.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ColaborativeItemBasedSolver.cpp" />
+    <ClCompile Include="ColaborativeSolver.cpp" />
     <ClCompile Include="ColaborativeUserBasedSolver.cpp" />
     <ClCompile Include="CrossValidation.cpp" />
-    <ClCompile Include="Estimative.cpp" />
-    <ClCompile Include="MathFuncs.cpp" />
-    <ClCompile Include="Normalization.cpp" />
-    <ClCompile Include="Similarity.cpp" />
     <ClCompile Include="Solver.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
